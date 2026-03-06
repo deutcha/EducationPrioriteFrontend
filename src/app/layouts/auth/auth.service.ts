@@ -4,6 +4,7 @@ import { catchError, map, Observable, of, Subscription, tap } from 'rxjs';
 import { LoginRequest, User, UserMap, UserSaveRequest } from '../../model/user';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 interface JwtPayload {
   sub: string;      
@@ -19,7 +20,7 @@ interface JwtPayload {
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private BASE_URL = "http://localhost:8081";
+  private BASE_URL = environment.API_URL;
   private router = inject(Router);
   user = signal<UserMap | User | null | undefined>(undefined);
   user2 = signal<User | null | undefined>(undefined);

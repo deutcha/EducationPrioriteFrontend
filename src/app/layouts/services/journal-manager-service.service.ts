@@ -7,13 +7,14 @@ import {
   RubriqueDto, RubriqueSaveDto, 
   MessageContact 
 } from '../../model/model'; 
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class JournalManagerService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8081/api/v1/journal-manager';
+  private readonly API_URL = `${environment.API_URL}/api/v1/journal-manager`;
 
   // --- ARTICLES ---
 

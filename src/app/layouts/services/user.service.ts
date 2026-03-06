@@ -2,13 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User, UserSaveRequest } from '../../model/user';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8081/api';
+  private readonly API_URL = `${environment.API_URL}/api`;
 
   
   getAllUsers(email?: string): Observable<User[]> {
