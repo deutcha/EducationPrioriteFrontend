@@ -328,12 +328,12 @@
         <i class="pi pi-info-circle"></i>
         Les champs marqués comme obligatoires doivent être renseignés avant de publier le journal.
       </p>
-      <div class="flex gap-3">
+      <div class="flex gap-3 ml-auto sm:ml-0">
         <button (click)="saveJournal()" 
               [disabled]="loadingBtn"
               class="flex items-center gap-2 bg-white text-[#e8354a] border-1.5 border-[#f87187] px-6 py-2.5 rounded-xl text-[0.83rem] font-bold shadow-[0_2px_8px_rgba(232,53,74,0.1)] hover:bg-red-50 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
         @if (loadingBtn) {
-          <i class="pi pi-spin pi-spinner text-sm"></i> Enregistrement...
+          <i class="pi pi-spin pi-spinner text-sm"></i> Publication...
         } @else {
           <i class="pi pi-check-circle"></i> Publier le journal
         }

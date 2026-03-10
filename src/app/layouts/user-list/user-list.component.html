@@ -17,7 +17,7 @@
       </div>
       <div class="flex flex-col items-start lg:items-end gap-2 shrink-0">
         <div class="flex items-center gap-2 bg-white/20 text-white border border-white/30 backdrop-blur-md px-4 py-1.5 rounded-full text-[0.75rem] font-bold">
-          <i class="pi pi-users text-[0.7rem]"></i> {{ filteredUsers.length }} utilisateurs actifs
+          <i class="pi pi-users text-[0.7rem]"></i> {{ users.length }} utilisateurs actifs
         </div>
         
       </div>
@@ -28,20 +28,36 @@
     <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 shadow-sm">
       <div class="relative flex-1 group w-full">
         <i class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#e8354a] transition-colors"></i>
-        <input type="text" [(ngModel)]="searchTerm"
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()"
                placeholder="Rechercher par email, nom d'utilisateur ou rôle..." 
                class="w-full pl-11 pr-4 py-3 bg-transparent border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:border-[#f87187] focus:ring-4 focus:ring-red-500/5 transition-all">
       </div>
-      <div class="relative shrink-0 w-48">
-        <p-datepicker  
-          [(ngModel)]="selectedDate" 
-          placeholder="Filtrer par date" 
-          [showClear]="true"
-          [iconDisplay]="'input'" 
-          [showIcon]="true"
-          dateFormat="dd/mm/yy"
-          styleClass="modern-calendar w-full">
-        </p-datepicker>
+      <div class="relative shrink-0 flex gap-3 flex-wrap ">
+        <div class="relative shrink-0 w-full sm:w-48">
+          <p-datepicker  
+            [(ngModel)]="selectedDateDebut"
+            (ngModelChange)="onFilterChange()"
+            placeholder="Date début" 
+            [showClear]="true"
+            [iconDisplay]="'input'" 
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            styleClass="modern-calendar w-full">
+          </p-datepicker>
+        </div>
+
+        <div class="relative shrink-0 w-full sm:w-48">
+          <p-datepicker  
+            [(ngModel)]="selectedDateFin"
+            (ngModelChange)="onFilterChange()"
+            placeholder="Date fin" 
+            [showClear]="true"
+            [iconDisplay]="'input'" 
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            styleClass="modern-calendar w-full">
+          </p-datepicker>
+        </div>
       </div>
     </div>
   </div>
@@ -51,9 +67,7 @@
       <div>
         <h2 class="text-[1rem] font-black text-slate-800 m-0">Liste des utilisateurs</h2>
       </div>
-      <span class="text-[0.78rem] text-[#e8354a] font-bold">
-        Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, filteredUsers.length) }} sur {{ filteredUsers.length }}
-      </span>
+      
     </div>
 
     <div class="overflow-x-auto">
@@ -67,7 +81,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          @for (user of paginatedUsers; track user.id) {
+          @for (user of users; track user.id) {
             <tr class="hover:bg-slate-50 transition-colors">
               <td class="px-6 py-4">
                 <div class="flex items-center gap-4">
@@ -99,45 +113,37 @@
               </td>
             </tr>
           } @empty {
-            <tr>
-              <td colspan="5" class="py-20 text-center">
-                <i class="pi pi-users text-4xl text-slate-100 block mb-3"></i>
-                <p class="text-sm font-black text-slate-400 uppercase tracking-widest m-0">Aucun utilisateur trouvé</p>
-              </td>
-            </tr>
+            @if (loading) {
+              <tr>
+                <td colspan="5" class="py-20 text-center">
+                  <i class="pi pi-users text-4xl text-slate-100 block mb-3"></i>
+                  <p class="text-sm font-black text-slate-400 uppercase tracking-widest m-0">
+                    <p-progress-spinner ariaLabel="loading" />
+                  </p>
+                </td>
+              </tr>
+             
+            } @else {
+              <tr>
+                <td colspan="5" class="py-20 text-center">
+                  <i class="pi pi-users text-4xl text-slate-100 block mb-3"></i>
+                  <p class="text-sm font-black text-slate-400 uppercase tracking-widest m-0">Aucun utilisateur trouvé</p>
+                </td>
+              </tr>
+            }
+            
           }
         </tbody>
       </table>
     </div>
 
-    <div class="flex flex-wrap items-center justify-between p-5 border-t border-slate-100 bg-white gap-4">
-      <p class="text-[0.75rem] text-slate-500 m-0 flex items-center gap-2">
-        <i class="pi pi-info-circle text-[#e8354a]"></i>
-        Les opérations de suppression sont définitives.
-      </p>
-      
-      <div class="flex items-center gap-1">
-        <button (click)="prevPage()" [disabled]="currentPage === 1" 
-                class="w-8 h-8 rounded-full border-1.5 border-slate-200 flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-[#f87187] hover:text-[#e8354a] transition-all cursor-pointer">
-          <i class="pi pi-chevron-left text-[0.7rem]"></i>
-        </button>
-        
-        @for (p of pages; track p) {
-          <button (click)="goToPage(p)"
-                  [class]="p === currentPage 
-                    ? 'bg-[#e8354a] border-[#e8354a] text-white shadow-lg shadow-red-200' 
-                    : 'bg-white border-slate-200 text-slate-600 hover:border-[#f87187]'"
-                  class="w-8 h-8 rounded-full border-1.5 flex items-center justify-center text-[0.8rem] font-black transition-all cursor-pointer">
-            {{ p }}
-          </button>
-        }
-
-        <button (click)="nextPage()" [disabled]="currentPage === totalPages" 
-                class="w-8 h-8 rounded-full border-1.5 border-slate-200 flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-[#f87187] hover:text-[#e8354a] transition-all cursor-pointer">
-          <i class="pi pi-chevron-right text-[0.7rem]"></i>
-        </button>
-      </div>
-    </div>
+     <p-paginator 
+      [rows]="pageSize" 
+      [totalRecords]="totalElements"
+      (onPageChange)="onPageChange($event)"
+      [pageLinkSize]="3"
+      styleClass="mt-6 custom-paginator">
+    </p-paginator>
   </div>
 
   <p-dialog [(visible)]="displayModal" [modal]="true"
