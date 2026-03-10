@@ -42,7 +42,7 @@ export class JournalComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   loadingBtn: boolean = false;
   currentPage = 0;
-  pageSize = 3;
+  pageSize = 12;
   totalElements = 0;
   totalPages = 0;
 

@@ -49,7 +49,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   loading: boolean = true;
   currentPage = 0;
-  pageSize = 3;
+  pageSize = 10;
   totalElements = 0;
   totalPages = 0;
 
