@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { LoginRequest, UserMap } from '../../../model/user';
 import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,8 @@ import { MessageService } from 'primeng/api';
     ReactiveFormsModule,
     InputTextModule,
     ButtonModule,
-    CheckboxModule
+    CheckboxModule,
+    ToastModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
@@ -35,6 +37,7 @@ export class LoginComponent implements OnDestroy{
 
   loginForm: FormGroup;
   rememberMe = false;
+  showPassword: boolean = false;
 
   constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
@@ -65,8 +68,8 @@ export class LoginComponent implements OnDestroy{
         this.router.navigate(['/child/dasboard']);
       },
        error: (error) => {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: error.error?.message || 'echec de la connexion' });
-        this.router.navigate(['/login']);
+        console.log(error)
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: error.error?.errorMessage || 'echec de la connexion' });
       }
      })
     

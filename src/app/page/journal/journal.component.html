@@ -26,7 +26,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <span class="flex items-center gap-2 bg-white/20 border border-white/30 text-white/90 px-4 py-1.5 rounded-full text-[0.72rem] font-bold backdrop-blur-md">
-            <i class="pi pi-file-pdf"></i> {{ 3 }} journaux
+            <i class="pi pi-file-pdf"></i> {{ journals.length }} journaux
           </span>
         </div>
       </div>
@@ -89,7 +89,7 @@
       </p>
     </div>
 
-   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
       @for (j of journals; track j.id) {
         <div (click)="showDetails(j)" 
             class="group bg-white border border-slate-100 overflow-hidden cursor-pointer shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all duration-200 rounded-xl">
@@ -108,20 +108,17 @@
             </div>
 
             <span [class]="j.statut === 'ACTIF' ? 'bg-[#10b981] text-white' : 'bg-white/85 text-slate-500'" 
-                  class="absolute bottom-3 right-3 rounded-lg px-3 py-1.5 text-[0.7rem] font-[800] z-10 shadow-sm">
+                  class="absolute bottom-3 right-3 rounded-lg px-3 py-1.5 text-[0.7rem] font-[800] z-10 shadow-sm" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
               {{ j.statut === 'ACTIF' ? 'ACTIF' : 'INACTIF' }}
             </span>
           </div>
 
           <div class="p-4 md:p-5">
-            <div class="flex flex-col sm:flex-row justify-between items-start gap-2 mb-1.5">
+            <div class="flex flex-col justify-between items-start gap-2 mb-1.5">
               <h3 class="text-[0.95rem] font-[800] text-slate-800 m-0 flex-1 line-clamp-2">{{ j.titre }}</h3>
               <span class="text-[0.68rem] text-[#f87187] font-[600] whitespace-nowrap">
                 Ajouté le {{ j.dateAjout | date:'dd/MM/yyyy' }}
               </span>
-            </div>
-            <div class="flex flex-wrap gap-x-2 gap-y-1 text-[0.68rem] font-[600]">
-              <span class="text-[#f87187] truncate">Slug : {{ j.slug }}</span>
             </div>
           </div>
 
@@ -382,11 +379,11 @@
 
         <div class="p-2 sm:p-6 md:p-10">
           
-          <div class="bg-white border border-slate-200 rounded-[1.25rem] p-4 sm:p-6 md:p-8 shadow-sm grid grid-cols-1 lg:grid-cols-[380px_1fr] xl:grid-cols-[500px_1fr] gap-10 mb-6">
+          <div class="bg-white border border-slate-200 rounded-[1.25rem] p-4 sm:p-6 md:p-8 shadow-sm grid grid-cols-1 lg:grid-cols-[380px_1fr]  gap-10 mb-6">
             
             <div class="flex flex-col gap-6">
               <div class="flex flex-col gap-2">
-                <div class="w-full aspect-[40/22] rounded-[0.875rem] border border-slate-100 overflow-hidden shadow-sm bg-slate-50">
+                <div class="w-full aspect-[40/45] rounded-[0.875rem] border border-slate-100 overflow-hidden shadow-sm bg-slate-50">
                   <img *ngIf="selectedJournal.imageCouverture" [src]="selectedJournal.imageCouverture" class="w-full h-full object-cover" />
                   <div *ngIf="!selectedJournal.imageCouverture" class="w-full h-full bg-gradient-to-br from-[#e8354a] to-[#f87187] flex items-center justify-center text-white/50">
                     <i class="pi pi-book text-6xl"></i>
@@ -425,11 +422,8 @@
                     <label class="block text-[0.68rem] font-extrabold text-[#e8354a] uppercase tracking-wider">Titre</label>
                     <p class="text-[0.875rem] font-semibold text-slate-700 m-0">{{ selectedJournal.titre }}</p>
                   </div>
-                  <div class="space-y-1">
-                    <label class="block text-[0.68rem] font-extrabold text-[#e8354a] uppercase tracking-wider">Slug</label>
-                    <p class="text-[0.78rem] font-mono text-slate-500 m-0 break-all">{{ selectedJournal.slug }}</p>
-                  </div>
-                  <div class="space-y-1">
+                  
+                  <div class="space-y-1" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
                     <label class="block text-[0.68rem] font-extrabold text-[#e8354a] uppercase tracking-wider">Statut</label>
                     <span [class.bg-emerald-50]="selectedJournal.statut === 'ACTIF'"
                           [class.text-emerald-600]="selectedJournal.statut === 'ACTIF'"

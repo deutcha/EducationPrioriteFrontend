@@ -27,13 +27,18 @@
 
       <div class="form-group">
         <label for="password" class="form-label">Mot de passe *</label>
-        <div class="password-container">
+        <div class="relative w-full">
           <input pInputText 
-                 id="password"
-                 formControlName="password"
-                 type="password"
-                 placeholder="Ton mot de passe"
-                 class="w-full password-input">
+                id="password"
+                formControlName="password"
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="Ton mot de passe"
+                class="w-full password-input pr-10">
+          <button type="button"
+                  (click)="showPassword = !showPassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#e8354a] transition-colors">
+            <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="text-sm"></i>
+          </button>
         </div>
         @if (hasError('password')) {
           <small class="error-text">{{ getErrorMessage('password') }}</small>
@@ -61,3 +66,5 @@
   </div>
 
 </div>
+
+<p-toast />

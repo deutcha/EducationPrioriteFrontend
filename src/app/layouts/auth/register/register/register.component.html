@@ -28,24 +28,40 @@
       <div class="flex flex-col">
         <div class="form-group">
           <label for="password" class="form-label">{{ userId ? 'Nouveau mot de passe (Optionnel)' : 'Mot de passe *' }}</label>
-          <div class="password-container">
-            <input pInputText id="password" formControlName="password" type="password" class="w-full password-input">
+          <div class="password-container relative">
+            <input pInputText id="password" formControlName="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  class="w-full password-input pr-10">
+            <button type="button"
+                    (click)="showPassword = !showPassword"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#e8354a] transition-colors">
+              <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="text-sm"></i>
+            </button>
           </div>
           @if (hasError('password')) { <small class="error-text">{{ getErrorMessage('password') }}</small> }
           
           @if (!userId || password?.value) {
             <div class="password-rules">
-                <div class="rule" [class.valid]="hasValidLength()"><i [class]="getLengthIcon()"></i><span>8-12 caractères</span></div>
-                <div class="rule" [class.valid]="hasUpperCase()"><i [class]="getUpperCaseIcon()"></i><span>1 majuscule</span></div>
-                <div class="rule" [class.valid]="hasNumber()"><i [class]="getNumberIcon()"></i><span>1 chiffre</span></div>
-                <div class="rule" [class.valid]="hasSpecialChar()"><i [class]="getSpecialCharIcon()"></i><span>1 caractère spécial</span></div>
+              <div class="rule" [class.valid]="hasValidLength()"><i [class]="getLengthIcon()"></i><span>8-12 caractères</span></div>
+              <div class="rule" [class.valid]="hasUpperCase()"><i [class]="getUpperCaseIcon()"></i><span>1 majuscule</span></div>
+              <div class="rule" [class.valid]="hasNumber()"><i [class]="getNumberIcon()"></i><span>1 chiffre</span></div>
+              <div class="rule" [class.valid]="hasSpecialChar()"><i [class]="getSpecialCharIcon()"></i><span>1 caractère spécial</span></div>
             </div>
           }
         </div>
 
         <div class="form-group mt-4">
           <label for="confirmPassword" class="form-label">Confirmer le mot de passe {{ userId ? '' : '*' }}</label>
-          <input pInputText id="confirmPassword" formControlName="confirmPassword" type="password" class="w-full password-input">
+          <div class="relative">
+            <input pInputText id="confirmPassword" formControlName="confirmPassword"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  class="w-full password-input pr-10">
+            <button type="button"
+                    (click)="showConfirmPassword = !showConfirmPassword"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#e8354a] transition-colors">
+              <i [class]="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="text-sm"></i>
+            </button>
+          </div>
           @if (registerForm.hasError('passwordMismatch')) { <small class="error-text">Les mots de passe ne correspondent pas</small> }
         </div>
 

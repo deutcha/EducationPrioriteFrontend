@@ -18,16 +18,25 @@ export interface RubriqueSaveDto {
 /**
  * Modèles Article
  */
+export interface ArticleSectionDto {
+  id?: number;
+  contenu: string;
+  image?: string;
+  ordre: number;
+  imageFile?: File; 
+}
+
 export interface ArticleDto {
   id: number;
   titre: string;
   slug: string;
   contenu: string;
   image?: string;
-  datePublication: string; 
+  datePublication: string;
   statut: StatutArticle;
   rubriqueId: number;
   rubriqueNom: string;
+  sections?: ArticleSectionDto[]; 
 }
 
 export interface ArticleSaveDto {

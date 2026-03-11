@@ -52,6 +52,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private messageService = inject(MessageService);
   private subs = new Subscription();
   isvalid = false;
+  showPassword: boolean = false;
+  showConfirmPassword: boolean = false;
 
   constructor() {
     this.registerForm = this.fb.group({

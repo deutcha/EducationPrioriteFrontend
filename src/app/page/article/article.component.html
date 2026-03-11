@@ -112,15 +112,13 @@
                       'bg-emerald-50 text-emerald-700 border-emerald-200': article.statut === 'PUBLIE',
                       'bg-orange-50 text-orange-700 border-orange-200': article.statut === 'BROUILLON'
                     }"
-                    class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase shrink-0">
+                    class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase shrink-0" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
                 {{ article.statut }}
               </span>
-              <span class="text-[10px] text-[#f35f75] shrink-0">• {{ article.datePublication | date:'dd/MM/yyyy' }}</span>
+              
             </div>
 
             <div class="flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-slate-400">
-              <span>Slug : <span class="text-[#f35f75] font-medium">{{ article.slug }}</span></span>
-              <span>•</span>
               <span>Rubrique : <span class="text-[#f35f75] font-medium">{{ rubriqueNom }}</span></span>
             </div>
 
@@ -136,7 +134,7 @@
                 Dernière mise à jour : {{ article.datePublication | date:'dd/MM/yyyy' }}
               </p>
 
-              <div class="flex items-center gap-2 flex-wrap ">
+              <div class="flex items-center gap-2 flex-wrap">
                 <button (click)="showDetails(article)"
                         class="flex items-center gap-1.5 bg-[#fde2e6] text-xs text-[#f54b65] hover:text-[#f1324f] border border-[#f54b65] hover:border-[#f1324f] px-3 py-1.5 rounded-lg transition-all font-medium">
                   <i class="pi pi-eye text-[10px]"></i> Détails
@@ -169,19 +167,17 @@
               </div>
               <p class="text-slate-400 font-bold text-sm uppercase tracking-widest">Aucun article trouvé</p>
               <p class="text-slate-300 text-xs mt-1">Modifiez votre recherche ou ajoutez un nouvel article</p>
-          </div>
+            </div>
           }
       }
     </div>
-      <p-paginator 
-            [rows]="pageSize" 
-            [totalRecords]="totalElements"
-            (onPageChange)="onPageChange($event)"
-            [pageLinkSize]="3"
-            styleClass="mt-6 bg-[#f8fafc]"
-           >
-        </p-paginator>
-  </div>
+    <p-paginator 
+          [rows]="pageSize" 
+          [totalRecords]="totalElements"
+          (onPageChange)="onPageChange($event)"
+          [pageLinkSize]="3"
+          styleClass="mt-6 bg-[#f8fafc]">
+    </p-paginator>
 
   <p-dialog [(visible)]="articleDialog"
             [modal]="true" [draggable]="false" [closable]="true"
@@ -293,101 +289,281 @@
 
 
   <p-dialog [(visible)]="displayDetails"
-            [modal]="true" [draggable]="false" [closable]="true"
-            styleClass="article-details-dialog" [showHeader]="false"
-            [breakpoints]="{ '1199px': '95vw', '575px': '95vw' }">
+          [modal]="true" [draggable]="false" [closable]="true"
+          styleClass="article-details-dialog" [showHeader]="false"
+          [breakpoints]="{ '1199px': '95vw', '575px': '95vw' }">
 
-    @if (selectedArticle) {
-      <div class="flex flex-col">
+      @if (selectedArticle) {
+        <div class="flex flex-col">
 
-        <div class="bg-gradient-to-r from-[#e11d48] to-[#fb7185] p-6 md:p-8 rounded-t-xl">
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-            <div class="flex-1">
-              <p class="text-white/80 text-[10px] font-black uppercase tracking-widest mb-1">ARTICLES</p>
-              <h2 class="text-xl md:text-2xl font-extrabold text-white mb-2">Détails de l'article</h2>
-              <p class="text-white/70 text-sm max-w-sm">Vue détaillée avec image de couverture, métadonnées, statut et actions rapides.</p>
-              <div class="flex flex-wrap gap-2 mt-4">
-                <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full border border-white/20">Rubrique : {{ rubriqueNom }}</span>
-                <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full border border-white/20">Publié le {{ selectedArticle.datePublication | date:'dd/MM/yyyy' }}</span>
-                <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full border border-white/20">{{ selectedArticle.slug }}</span>
+          <div class="bg-gradient-to-r from-[#e11d48] to-[#fb7185] p-6 md:p-8 rounded-t-xl">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+              <div class="flex-1">
+                <p class="text-white/80 text-[10px] font-black uppercase tracking-widest mb-1">ARTICLES</p>
+                <h2 class="text-xl md:text-2xl font-extrabold text-white mb-2">Détails de l'article</h2>
+                <p class="text-white/70 text-sm max-w-sm">Vue détaillée avec image de couverture, métadonnées, statut et actions rapides.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                  <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full border border-white/20">Rubrique : {{ rubriqueNom }}</span>
+                  <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full border border-white/20">Publié le {{ selectedArticle.datePublication | date:'dd/MM/yyyy' }}</span>
+                  <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full border border-white/20">{{ selectedArticle.slug }}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 flex-shrink-0 flex-wrap">
+                <button (click)="displayDetails = false"
+                        class="bg-white/20 hover:bg-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl border border-white/30 transition-all whitespace-nowrap">
+                  Retour à la liste
+                </button>
               </div>
             </div>
-            <div class="flex items-center gap-3 flex-shrink-0 flex-wrap">
-              <button (click)="displayDetails = false"
-                      class="bg-white/20 hover:bg-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl border border-white/30 transition-all whitespace-nowrap">
-                Retour à la liste
-              </button>
+          </div>
+
+          <div class="flex justify-center flex-col md:flex-row gap-6 bg-[#f8fafc] p-4 md:p-6 rounded-b-xl">
+
+            <div class="w-full md:max-w-[40rem] flex flex-col gap-4">
+
+              <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+                @if (selectedArticle.image) {
+                  <img [src]="selectedArticle.image" class="w-full object-cover h-[300px] sm:max-h-[400px]">
+                } @else {
+                  <div class="h-64 flex flex-col items-center justify-center bg-gradient-to-r from-[#e11d48] to-[#fb7185]">
+                    <i class="pi pi-image text-5xl text-red-200 mb-2"></i>
+                    <span class="text-sm font-medium text-red-300">Image de couverture</span>
+                  </div>
+                }
+              </div>
+
+              <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-4">CONTENU DE L'ARTICLE</p>
+                <div class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ selectedArticle.contenu }}</div>
+              </div>
+
+              <div class=" w-full bg-[#f8fafc] rounded-b-xl">
+
+                  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                      <div>
+                        <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-0.5">SECTIONS</p>
+                        <h3 class="text-sm font-bold text-slate-900">Galerie des sections</h3>
+                      </div>
+                      <button (click)="openSectionDialog(selectedArticle)"
+                              class="flex items-center gap-1.5 bg-gradient-to-r from-[#e11d48] to-[#fb7185] text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm hover:shadow-md transition-all"
+                              *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+                        <i class="pi pi-plus text-[10px]"></i> Ajouter une section
+                      </button>
+                    </div>
+
+                    @if (loadingSections[selectedArticle.id]) {
+                      <div class="flex justify-center py-8">
+                        <p-progress-spinner [style]="{width: '32px', height: '32px'}" />
+                      </div>
+                    }
+                  </div>
+
+                @if (sectionsMap[selectedArticle.id] && sectionsMap[selectedArticle.id].length > 0) {
+                    <div class=" flex flex-col gap-6 mt-6">
+                      @for (section of sectionsMap[selectedArticle.id]; track section.id) {
+
+                        <div class="border border-slate-100 shadow-sm bg-white group/section hover:shadow-md transition-all overflow-hidden p-6">
+
+                          @if (section.image) {
+
+                            <div >
+
+                                <span class="text-[10px] font-black text-[#f35f75] uppercase tracking-widest">
+                                  Section {{ $index + 1 }}
+                                </span>
+                      
+                              <div class="relative overflow-hidden mt-2">
+                                <img [src]="section.image"
+                                    [alt]="'Section ' + ($index + 1)"
+                                    class=" object-cover group-hover/section:scale-105 transition-transform duration-500 w-full md:w-[310px] h-[240px] my-4 md:my-0 image-section" 
+                                    [ngClass]="$index % 2 === 0 ? 'float-left md:mr-4' : 'float-right md:ml-4'">
+                                
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent
+                                                opacity-0 group-hover/section:opacity-100 transition-opacity
+                                                flex items-end justify-end p-3 gap-2"
+                                        *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+                                      <button (click)="openSectionDialog(selectedArticle, section)"
+                                              class="bg-white/95 hover:bg-white text-[#e8354a] text-[10px] font-bold px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow">
+                                        <i class="pi pi-pencil text-[10px]"></i>
+                                      </button>
+                                      <button (click)="deleteSection(selectedArticle, section)"
+                                              class="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow">
+                                        <i class="pi pi-trash text-[10px]"></i>
+                                      </button>
+                                    </div>
+                              
+                                <p class="text-[13px] text-slate-600 text-justify">
+                                  {{ section.contenu }}
+                                </p>
+                              </div>   
+
+                            </div>
+
+                          } @else {
+
+                            <div class="">
+                              <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="text-[10px] font-black text-[#f35f75] uppercase tracking-widest">
+                                  Section {{ $index + 1 }}
+                                </span>
+                                <div class="flex items-center gap-1.5" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+                                  <button (click)="openSectionDialog(selectedArticle, section)"
+                                          class="text-[#e8354a] border border-[#e8354a]/30 hover:bg-[#fde2e6] text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1">
+                                    <i class="pi pi-pencil text-[10px]"></i>
+                                  </button>
+                                  <button (click)="deleteSection(selectedArticle, section)"
+                                          class="text-red-500 border border-red-200 hover:bg-red-50 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1">
+                                    <i class="pi pi-trash text-[10px]"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <p class="text-[13px] text-slate-600 leading-relaxed text-justify">{{ section.contenu }}</p>
+                            </div>
+
+                          }
+
+                        </div>
+                      }
+                    </div>
+                  } @else if (!loadingSections[selectedArticle.id]) {
+                    <div class="flex flex-col items-center justify-center py-10 text-center">
+                      <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                        <i class="pi pi-images text-xl text-slate-300"></i>
+                      </div>
+                      <p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Aucune section</p>
+                      <p class="text-slate-300 text-xs mt-1">Ajoutez des sections pour enrichir cet article</p>
+                    </div>
+                  }
+                </div>
               
             </div>
+
+            <div class="w-full md:w-[25rem] flex flex-col gap-4" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+
+              <div class="hidden md:block bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">RÉSUMÉ</p>
+                <h3 class="text-sm font-bold text-slate-900 mb-0.5">Vue synthétique</h3>
+                <p class="text-red-400 text-xs mb-4">Informations clés de l'article.</p>
+                <div class="space-y-3">
+                  
+                  <div class="flex justify-between items-center flex-wrap text-sm border-b border-slate-50 pb-2">
+                    <span class="text-slate-500">Rubrique</span>
+                    <span class="font-bold text-slate-800">{{ rubriqueNom }}</span>
+                  </div>
+                  <div class="flex justify-between items-center flex-wrap text-sm border-b border-slate-50 pb-2">
+                    <span class="text-slate-500">Sections</span>
+                    <span class="font-bold text-slate-800">
+                      {{ (sectionsMap[selectedArticle.id] || []).length }}
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center flex-wrap text-sm">
+                    <span class="text-slate-500">Date de publication</span>
+                    <span class="font-bold text-slate-800">{{ selectedArticle.datePublication | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">ACTIONS RAPIDES</p>
+                <h3 class="text-sm font-bold text-slate-900 mb-3">Gérer l'article</h3>
+                <div class="flex flex-col gap-2">
+                  <button (click)="editArticle(selectedArticle); displayDetails=false"
+                          class="bg-white text-red-500 hover:bg-slate-100 text-sm font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg whitespace-nowrap border border-red-100">
+                    <i class="pi pi-pencil mr-2 text-xs"></i> Modifier l'article
+                  </button>
+                  <button (click)="deleteArticle(selectedArticle); displayDetails=false"
+                          class="w-full text-center text-sm text-red-500 hover:text-white hover:bg-red-500 px-4 py-2.5 rounded-xl font-bold transition-all border border-red-200">
+                    <i class="pi pi-trash mr-2 text-xs"></i> Supprimer l'article
+                  </button>
+                </div>
+              </div>
+
+            </div>
           </div>
+
+          
+
+          
+
+        </div>
+      }
+    </p-dialog>
+
+    <p-dialog [(visible)]="sectionDialogVisible"
+              [modal]="true" [draggable]="false" [closable]="true"
+              [style]="{width: '95vw', maxWidth: '600px'}"
+              [showHeader]="false" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+      <div class="flex flex-col">
+
+        <div class="px-6 pt-6 pb-4 border-b border-slate-100">
+          <p class="text-[11px] font-black text-red-500 uppercase tracking-widest mb-1">
+            {{ editingSection ? 'MODIFIER LA' : 'NOUVELLE' }} SECTION
+          </p>
+          <h2 class="text-lg font-extrabold text-slate-900">
+            {{ currentArticleForSection?.titre | slice:0:45 }}{{ (currentArticleForSection?.titre?.length ?? 0)  > 45 ? '...' : '' }}
+          </h2>
         </div>
 
-        <div class="flex justify-center flex-col md:flex-row gap-6 bg-[#f8fafc] p-4 md:p-6 rounded-b-xl">
+        <div class="px-6 py-5 flex flex-col gap-5">
 
-          <div class="w-full md:max-w-[40rem] lg:col-span-2 flex flex-col gap-4">
-
-            <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-              @if (selectedArticle.image) {
-                <img [src]="selectedArticle.image" class="w-full object-cover max-h-[400px]">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Image de la section</label>
+            <div class="relative rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 hover:border-[#e8354a] transition-colors cursor-pointer group/img"
+                [class.border-solid]="sectionImagePreview"
+                [class.border-red-300]="sectionImagePreview">
+              <input type="file" (change)="onSectionFileSelected($event)" accept="image/*"
+                    class="absolute inset-0 opacity-0 cursor-pointer z-10">
+              @if (sectionImagePreview) {
+                <img [src]="sectionImagePreview" class="w-full h-48 object-cover">
+                <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                  <span class="text-white text-sm font-bold flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl">
+                    <i class="pi pi-camera"></i> Changer l'image
+                  </span>
+                </div>
               } @else {
-                <div class="h-64 flex flex-col items-center justify-center bg-gradient-to-r from-[#e11d48] to-[#fb7185]">
-                  <i class="pi pi-image text-5xl text-red-200 mb-2"></i>
-                  <span class="text-sm font-medium text-red-300">Image de couverture</span>
-                  <span class="text-xs text-red-200 mt-1">Prévisualisation 16:9</span>
+                <div class="h-32 flex flex-col items-center justify-center bg-slate-50 gap-2">
+                  <i class="pi pi-image text-3xl text-slate-300"></i>
+                  <span class="text-xs text-slate-400 font-medium">Cliquer pour ajouter une image</span>
                 </div>
               }
             </div>
-
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-              <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-4">CONTENU DE L'ARTICLE</p>
-              <div class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ selectedArticle.contenu }}</div>
-            </div>
           </div>
 
-          <div class="w-full md:w-[25rem] flex flex-col gap-4" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
-
-            <div class=" hidden md:inline bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-              <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">RÉSUMÉ</p>
-              <h3 class="text-sm font-bold text-slate-900 mb-0.5">Vue synthétique</h3>
-              <p class="text-red-400 text-xs mb-4">Informations clés de l'article.</p>
-              <div class="space-y-3">
-                
-                <div class="flex justify-between items-center flex-wrap text-sm border-b border-slate-50 pb-2">
-                  <span class="text-slate-500">Slug</span>
-                  <span class="font-bold text-slate-800 text-xs truncate max-w-[140px] text-right">{{ selectedArticle.slug }}</span>
-                </div>
-                <div class="flex justify-between items-center flex-wrap text-sm border-b border-slate-50 pb-2">
-                  <span class="text-slate-500">Rubrique</span>
-                  <span class="font-bold text-slate-800">{{ rubriqueNom }}</span>
-                </div>
-                <div class="flex justify-between items-center flex-wrap text-sm">
-                  <span class="text-slate-500">Date de publication</span>
-                  <span class="font-bold text-slate-800">{{ selectedArticle.datePublication | date:'dd/MM/yyyy' }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5" >
-              <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">ACTIONS RAPIDES</p>
-              <h3 class="text-sm font-bold text-slate-900 mb-0.5">Gérer l'article</h3>
-              <div class="flex flex-col gap-2">
-                
-                <button (click)="editArticle(selectedArticle); displayDetails=false"
-                      class="bg-white text-red-500 hover:bg-slate-100 text-sm font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg whitespace-nowrap">
-                    Modifier
-                </button>
-                <button (click)="deleteArticle(selectedArticle); displayDetails=false"
-                        class="w-full text-center text-sm text-white bg-red-600 hover:bg-red-700 px-4 py-3 rounded-xl font-bold transition-all shadow-md shadow-red-200">
-                  Supprimer définitivement
-                </button>
-              </div>
-            </div>
-
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
+              Contenu <span class="text-red-500">*</span>
+            </label>
+            <textarea [(ngModel)]="sectionForm.contenu" rows="5"
+                      placeholder="Rédigez le contenu de cette section..."
+                      class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-300 placeholder-slate-300 text-slate-700 resize-none transition-all"></textarea>
+          </div>
+*
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Ordre d'affichage</label>
+            <input type="number" [(ngModel)]="sectionForm.ordre" min="0"
+                  class="w-32 px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-300 text-slate-700 transition-all" />
           </div>
         </div>
+
+        <div class="flex items-center justify-end gap-3 px-6 pb-6 border-t border-slate-100 pt-4">
+          <button (click)="sectionDialogVisible = false"
+                  class="text-slate-500 hover:text-slate-700 font-semibold text-sm px-4 py-2 rounded-lg hover:bg-slate-100 transition-all">
+            Annuler
+          </button>
+          <button (click)="saveSection()" [disabled]="loadingSectionBtn || !sectionForm.contenu"
+                  class="bg-gradient-to-r from-[#e11d48] to-[#fb7185] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2">
+            @if (loadingSectionBtn) {
+              <i class="pi pi-spin pi-spinner text-sm"></i> Enregistrement...
+            } @else {
+              <i class="pi pi-check-circle text-sm"></i>
+              {{ editingSection ? 'Mettre à jour' : 'Ajouter la section' }}
+            }
+          </button>
+        </div>
       </div>
-    }
-  </p-dialog>
+    </p-dialog>
 
   <p-confirmDialog />
   <p-toast position="bottom-right" />

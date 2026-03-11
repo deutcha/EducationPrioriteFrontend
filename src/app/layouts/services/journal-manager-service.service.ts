@@ -5,7 +5,8 @@ import {
   ArticleDto, ArticleSaveDto, 
   JournalPdfDto, JournalPdfSaveDto, 
   RubriqueDto, RubriqueSaveDto, 
-  MessageContact, Page 
+  MessageContact, Page, 
+  ArticleSectionDto
 } from '../../model/model'; 
 import { environment } from '../../../environments/environment';
 
@@ -16,9 +17,10 @@ export class JournalManagerService {
   private http = inject(HttpClient);
   private readonly API_URL = `${environment.API_URL}/api/v1/journal-manager`;
 
-  // --- ARTICLES ---
-
-  getArticles( id?: number, rubriqueId?: number, search?: string, statut?: string, dateDebut?: Date, dateFin?: Date, page: number = 0, size: number = 10): Observable<Page<ArticleDto>> {
+  getArticles(
+    id?: number, rubriqueId?: number, search?: string, statut?: string,
+    dateDebut?: Date, dateFin?: Date, page: number = 0, size: number = 10
+  ): Observable<Page<ArticleDto>> {
     let params = new HttpParams();
 
     if (id) params = params.set('id', id.toString());
@@ -31,7 +33,6 @@ export class JournalManagerService {
       debut.setHours(0, 0, 0, 0);
       params = params.set('dateDebut', debut.toISOString());
     }
-
     if (dateFin) {
       const fin = new Date(dateFin);
       fin.setHours(23, 59, 59, 999);
@@ -48,15 +49,35 @@ export class JournalManagerService {
     return this.http.get<ArticleDto>(`${this.API_URL}/articles/${slug}`);
   }
 
-  saveArticle(id: number | null, article: ArticleSaveDto, imageFile?: File): Observable<ArticleDto> {
+  saveArticle(
+    id: number | null,
+    article: ArticleSaveDto,
+    imageFile?: File,
+    sections?: ArticleSectionDto[],
+    sectionImages?: (File | null)[]
+  ): Observable<ArticleDto> {
     const formData = new FormData();
     formData.append('titre', article.titre);
     formData.append('contenu', article.contenu);
     formData.append('statut', article.statut);
     formData.append('rubriqueId', article.rubriqueId.toString());
-    
+
     if (imageFile) {
       formData.append('image', imageFile);
+    }
+
+    // Sections : on envoie le JSON sans imageFile (champ local uniquement)
+    if (sections && sections.length > 0) {
+      const sectionsPayload = sections.map(({ imageFile: _, ...s }) => s);
+      formData.append('sections', JSON.stringify(sectionsPayload));
+
+      // Images des sections dans le même ordre que les sections
+      if (sectionImages && sectionImages.length > 0) {
+        sectionImages.forEach((file) => {
+          // On append toujours, même null → le backend reçoit une liste ordonnée
+          formData.append('sectionImages', file ?? new Blob(), file ? file.name : '');
+        });
+      }
     }
 
     if (id === null) {
@@ -68,6 +89,33 @@ export class JournalManagerService {
 
   deleteArticle(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/articles/${id}`);
+  }
+
+  // --- Sections (endpoints indépendants) ---
+
+  getSectionsByArticle(articleId: number): Observable<ArticleSectionDto[]> {
+    return this.http.get<ArticleSectionDto[]>(`${this.API_URL}/articles/${articleId}/sections`);
+  }
+
+  saveSection(articleId: number, section: ArticleSectionDto, imageFile?: File): Observable<ArticleSectionDto> {
+    const formData = new FormData();
+    const { imageFile: _, ...payload } = section;
+    formData.append('section', JSON.stringify(payload));
+    if (imageFile) formData.append('image', imageFile);
+
+    if (section.id) {
+      return this.http.patch<ArticleSectionDto>(`${this.API_URL}/articles/${articleId}/sections/${section.id}`, formData);
+    } else {
+      return this.http.post<ArticleSectionDto>(`${this.API_URL}/articles/${articleId}/sections`, formData);
+    }
+  }
+
+  deleteSection(articleId: number, sectionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/articles/${articleId}/sections/${sectionId}`);
+  }
+
+  deleteAllSections(articleId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/articles/${articleId}/sections`);
   }
 
   // --- JOURNAUX PDF ---

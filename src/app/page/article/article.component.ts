@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router'; 
-import { ArticleDto, ArticleSaveDto } from '../../model/model'; 
+import { ArticleDto, ArticleSaveDto, ArticleSectionDto  } from '../../model/model'; 
 import { StatutArticle } from '../../model/enum';
 import { JournalManagerService } from '../../layouts/services/journal-manager-service.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -20,6 +20,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { HasRoleDirective } from '../../layouts/auth/has-role.directive';
 import { PaginatorModule } from 'primeng/paginator';
 import { ProgressSpinner } from 'primeng/progressspinner';
+
 
 @Component({
   selector: 'app-article',
@@ -42,6 +43,16 @@ export class ArticleComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
   private router = inject(Router);
   private searchTimeout: any;
+
+  sectionsMap: { [articleId: number]: ArticleSectionDto[] } = {};
+  loadingSections: { [articleId: number]: boolean } = {};
+  sectionDialogVisible: boolean = false;
+  currentArticleForSection: ArticleDto | null = null;
+  editingSection: ArticleSectionDto | null = null;
+  sectionForm: ArticleSectionDto = { contenu: '', ordre: 0 };
+  sectionImageFile: File | null = null;
+  sectionImagePreview: string | null = null;
+  loadingSectionBtn: boolean = false;
 
   loading: boolean = true;
   loadingBtn: boolean = false;
@@ -158,6 +169,7 @@ export class ArticleComponent implements OnInit, OnDestroy {
   showDetails(article: ArticleDto) {
     this.selectedArticle = article;
     this.displayDetails = true;
+    this.loadSections(article);
     
   }
 
@@ -234,6 +246,97 @@ saveAsDraft(): void {
   this.article.statut = StatutArticle.BROUILLON;
   this.saveArticle();
 }
+
+  loadSections(article: ArticleDto) {
+    if (this.sectionsMap[article.id]) return; 
+    this.loadingSections[article.id] = true;
+    this.subs.add(
+      this.service.getSectionsByArticle(article.id).subscribe({
+        next: (sections) => {
+          this.sectionsMap[article.id] = sections;
+          this.loadingSections[article.id] = false;
+        },
+        error: () => { this.loadingSections[article.id] = false; }
+      })
+    );
+  }
+
+  openSectionDialog(article: ArticleDto, section?: ArticleSectionDto) {
+    this.currentArticleForSection = article;
+    this.sectionImageFile = null;
+    this.sectionImagePreview = null;
+    if (section) {
+      this.editingSection = section;
+      this.sectionForm = { ...section };
+      this.sectionImagePreview = section.image || null;
+    } else {
+      this.editingSection = null;
+      this.sectionForm = { contenu: '', ordre: (this.sectionsMap[article.id]?.length || 0) };
+    }
+    this.sectionDialogVisible = true;
+  }
+
+  onSectionFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.sectionImageFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => this.sectionImagePreview = e.target.result;
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveSection() {
+    if (!this.sectionForm.contenu || !this.currentArticleForSection) return;
+    this.loadingSectionBtn = true;
+    this.subs.add(
+      this.service.saveSection(
+        this.currentArticleForSection.id,
+        this.sectionForm,
+        this.sectionImageFile || undefined
+      ).subscribe({
+        next: (saved) => {
+          const articleId = this.currentArticleForSection!.id;
+          if (!this.sectionsMap[articleId]) this.sectionsMap[articleId] = [];
+          if (this.editingSection) {
+            const idx = this.sectionsMap[articleId].findIndex(s => s.id === saved.id);
+            if (idx !== -1) this.sectionsMap[articleId][idx] = saved;
+          } else {
+            this.sectionsMap[articleId].push(saved);
+          }
+          this.sectionDialogVisible = false;
+          this.loadingSectionBtn = false;
+          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Section enregistrée' });
+        },
+        error: () => {
+          this.loadingSectionBtn = false;
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la sauvegarde' });
+        }
+      })
+    );
+  }
+
+  deleteSection(article: ArticleDto, section: ArticleSectionDto) {
+    this.confirmationService.confirm({
+      message: 'Supprimer cette section ?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+      rejectLabel: 'Annuler',
+      rejectButtonStyleClass: 'p-button-text p-button-secondary',
+      accept: () => {
+        this.subs.add(
+          this.service.deleteSection(article.id, section.id!).subscribe({
+            next: () => {
+              this.sectionsMap[article.id] = this.sectionsMap[article.id].filter(s => s.id !== section.id);
+              this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Section supprimée' });
+            }
+          })
+        );
+      }
+    });
+  }
 
   ngOnDestroy() { 
     this.subs.unsubscribe(); 
