@@ -6,7 +6,7 @@
       <span class=" font-bold text-xl hidden lg:block">EducationPriorité</span>
     </div>
 
-    <nav class="hidden md:flex items-center space-x-6 text-sm font-bold uppercase tracking-wider">
+    <nav class="hidden xl:flex items-center space-x-6 text-sm font-bold uppercase tracking-wider">
       @for (item of items; track $index) {
         <a [routerLink]="item.routerLink" 
            routerLinkActive="border-b-2 border-white"
@@ -16,7 +16,7 @@
       }
     </nav>
 
-    <div class="hidden md:flex items-center space-x-3">
+    <div class="hidden xl:flex items-center space-x-3">
       @if (!isAuthenticated) {
         <a routerLink="/login" 
          class="px-5 py-2 rounded-full border border-white hover:bg-white hover:text-[#e11d48] transition font-bold text-sm">
@@ -28,18 +28,21 @@
       </a>
       } @else {
         <a routerLink="/login" (click)="onLogout()" 
-        class="px-5 py-2 rounded-full border border-white hover:bg-white hover:text-[#e11d48] transition font-bold text-sm">
-          Déconnexion
+          class="px-5 py-2 rounded-full border border-white hover:bg-white hover:text-[#e11d48] transition font-bold text-sm">
+            Déconnexion
         </a>
+        <div (click)="displayModal = true" [style.background]="getAvatarColor()" class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-white/20 overflow-hidden ml-auto cursor-pointer">
+          <span class="text-[0.78rem] font-black text-white uppercase tracking-tighter">{{ getInitials() }}</span>
+        </div>
       }
     </div>
 
-    <button class="md:hidden text-white text-2xl" (click)="toggleMobileMenu()">
+    <button class="xl:hidden text-white text-2xl" (click)="toggleMobileMenu()">
       <i [class]="mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'"></i>
     </button>
   </div>
 
-  <div *ngIf="mobileMenuOpen" class="md:hidden bg-red-700 border-t border-red-500 animate-fadein">
+  <div *ngIf="mobileMenuOpen" class="lg:hidden bg-red-700 border-t border-red-500 animate-fadein">
     <div class="flex flex-col p-4 space-y-4 font-bold uppercase text-sm">
       @for (item of items; track $index) {
         <a [routerLink]="item.routerLink" (click)="mobileMenuOpen = false">{{item.label}}</a>
@@ -50,7 +53,24 @@
         <a routerLink="/register" class="...">Inscription</a>
       } @else {
         <a routerLink="/login" (click)="onLogout()" class="...">Déconnexion</a>
+        <div (click)="displayModal = true" [style.background]="getAvatarColor()" class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-white/20 overflow-hidden cursor-pointer">
+          <span class="text-[0.78rem] font-black text-white uppercase tracking-tighter">{{ getInitials() }}</span>
+        </div>
       }
     </div>
   </div>
 </header>
+
+<p-dialog 
+    [(visible)]="displayModal" 
+    [modal]="true" 
+    [draggable]="false" 
+    [resizable]="false"
+    maskStyleClass="backdrop-blur-sm"
+    header="Mon Profil"
+    [style]="{width: '98vw', maxWidth: '1100px'}">
+    
+    <app-user-profile 
+    *ngIf="displayModal">
+    ></app-user-profile>
+</p-dialog>

@@ -20,6 +20,7 @@ export interface RubriqueSaveDto {
  */
 export interface ArticleSectionDto {
   id?: number;
+  titre: string;
   contenu: string;
   image?: string;
   ordre: number;

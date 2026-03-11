@@ -110,6 +110,7 @@ export class JournalComponent implements OnInit, OnDestroy {
   }
 
   onSearchChange() {
+    this.loading = true;
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
       this.currentPage = 0;
@@ -118,11 +119,13 @@ export class JournalComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange() {
+    this.loading = true;
     this.currentPage = 0;
     this.loadJournals();
   }
 
   onPageChange(event: any) {
+    this.loading = true;
     this.currentPage = event.page;
     this.loadJournals();
   }

@@ -26,14 +26,14 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <span class="flex items-center gap-2 bg-white/20 border border-white/30 text-white/90 px-4 py-1.5 rounded-full text-[0.72rem] font-bold backdrop-blur-md">
-            <i class="pi pi-file-pdf"></i> {{ journals.length }} journaux
+            <i class="pi pi-file-pdf"></i> {{ totalElements }} journaux
           </span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="px-4 sm:px-8 py-5 flex flex-wrap items-center justify-between gap-4">
+  <div class=" px-4 sm:px-8 py-5 flex flex-wrap items-center justify-between gap-4">
     <div class="flex gap-3 flex-wrap flex-col px-6 pt-6">
      
       <div class="flex gap-3 flex-wrap" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
@@ -90,86 +90,95 @@
     </div>
 
    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-      @for (j of journals; track j.id) {
-        <div (click)="showDetails(j)" 
-            class="group bg-white border border-slate-100 overflow-hidden cursor-pointer shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all duration-200 rounded-xl">
-          
-          <div class="relative h-[200px] bg-gradient-to-r from-[#e11d48] to-[#fb7185] flex items-center justify-center overflow-hidden p-2 transition-all duration-300 group-hover:p-0">
-            <div class="w-full h-full overflow-hidden rounded-lg transition-all duration-500 group-hover:rounded-none">
-              @if (j.imageCouverture) {
-                <img [src]="j.imageCouverture" 
-                    class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110" 
-                    alt="couverture" />
+        @if (!loading) {  
+
+          @for (j of journals; track j.id) {
+            <div (click)="showDetails(j)" 
+                class="group bg-white border border-slate-100 overflow-hidden cursor-pointer shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all duration-200 rounded-xl">
+              
+              <div class="relative h-[200px] bg-gradient-to-r from-[#e11d48] to-[#fb7185] flex items-center justify-center overflow-hidden p-2 transition-all duration-300 group-hover:p-0">
+                <div class="w-full h-full overflow-hidden rounded-lg transition-all duration-500 group-hover:rounded-none">
+                  @if (j.imageCouverture) {
+                    <img [src]="j.imageCouverture" 
+                        class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110" 
+                        alt="couverture" />
+                  } @else {
+                    <div class="flex items-center justify-center w-full h-full transition-transform duration-500 ease-out group-hover:scale-110">
+                      <i class="pi pi-book text-white/50 text-[3rem]"></i>
+                    </div>
+                  }
+                </div>
+
+                <span [class]="j.statut === 'ACTIF' ? 'bg-[#10b981] text-white' : 'bg-white/85 text-slate-500'" 
+                      class="absolute bottom-3 right-3 rounded-lg px-3 py-1.5 text-[0.7rem] font-[800] z-10 shadow-sm" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+                  {{ j.statut === 'ACTIF' ? 'ACTIF' : 'INACTIF' }}
+                </span>
+              </div>
+
+              <div class="p-4 md:p-5">
+                <div class="flex flex-col justify-between items-start gap-2 mb-1.5">
+                  <h3 class="text-[0.95rem] font-[800] text-slate-800 m-0 flex-1 line-clamp-2">{{ j.titre }}</h3>
+                  <span class="text-[0.68rem] text-[#f87187] font-[600] whitespace-nowrap">
+                    Ajouté le {{ j.dateAjout | date:'dd/MM/yyyy' }}
+                  </span>
+                </div>
+              </div>
+
+              <hr class="border-slate-100">
+
+              <div class="flex items-center justify-between p-3 px-4 gap-3" (click)="$event.stopPropagation()">
+                
+                <div class="hidden sm:flex items-center gap-1.5 text-[0.7rem] font-[600] text-slate-500 overflow-hidden flex-1 min-w-0">
+                  <span [class]="j.statut === 'ACTIF' ? 'bg-[#e8354a]' : 'bg-slate-300'" 
+                        class="w-[6px] h-[6px] rounded-full shrink-0"></span>
+                  <span class="truncate text-[#f87187]">{{ j.titre }}.pdf</span>
+                </div>
+
+                <div class="flex gap-1.5 shrink-0 ml-auto">
+                  <button (click)="showDetails(j)" 
+                          class="w-[34px] h-[34px] rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center text-[0.8rem] hover:bg-slate-100 hover:text-slate-700 transition-all">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button (click)="downloadPdf(j.fichierPdf)"
+                          class="w-[34px] h-[34px] rounded-lg bg-[#fff5f5] text-[#e8354a] flex items-center justify-center text-[0.8rem] hover:bg-[#fee2e2] transition-all">
+                    <i class="pi pi-download"></i>
+                  </button>
+                  <button (click)="editJournal(j)" 
+                          class="w-[34px] h-[34px] rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center text-[0.8rem] hover:bg-slate-100 hover:text-slate-700 transition-all"
+                          *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button (click)="deleteJournal(j.id)" 
+                          class="w-[34px] h-[34px] rounded-lg bg-[#fff5f5] text-[#e8354a] flex items-center justify-center text-[0.8rem] hover:bg-[#fee2e2] transition-all"
+                          *appHasRole="['ADMIN', 'SUPER_ADMIN']">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          } @empty {
+              @if (loading) {
+                <div class="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                  <p-progress-spinner ariaLabel="loading" />
+                </div>
               } @else {
-                <div class="flex items-center justify-center w-full h-full transition-transform duration-500 ease-out group-hover:scale-110">
-                  <i class="pi pi-book text-white/50 text-[3rem]"></i>
+                <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                  <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                    <i class="pi pi-inbox text-2xl text-slate-300"></i>
+                  </div>
+                  <p class="text-slate-400 font-bold text-sm uppercase tracking-widest">Aucun journal trouvé</p>
+                  <p class="text-slate-300 text-xs mt-1">Modifiez votre recherche ou ajoutez un nouveau journal</p>
                 </div>
               }
-            </div>
-
-            <span [class]="j.statut === 'ACTIF' ? 'bg-[#10b981] text-white' : 'bg-white/85 text-slate-500'" 
-                  class="absolute bottom-3 right-3 rounded-lg px-3 py-1.5 text-[0.7rem] font-[800] z-10 shadow-sm" *appHasRole="['ADMIN', 'SUPER_ADMIN']">
-              {{ j.statut === 'ACTIF' ? 'ACTIF' : 'INACTIF' }}
-            </span>
-          </div>
-
-          <div class="p-4 md:p-5">
-            <div class="flex flex-col justify-between items-start gap-2 mb-1.5">
-              <h3 class="text-[0.95rem] font-[800] text-slate-800 m-0 flex-1 line-clamp-2">{{ j.titre }}</h3>
-              <span class="text-[0.68rem] text-[#f87187] font-[600] whitespace-nowrap">
-                Ajouté le {{ j.dateAjout | date:'dd/MM/yyyy' }}
-              </span>
-            </div>
-          </div>
-
-          <hr class="border-slate-100">
-
-          <div class="flex items-center justify-between p-3 px-4 gap-3" (click)="$event.stopPropagation()">
-            
-            <div class="hidden sm:flex items-center gap-1.5 text-[0.7rem] font-[600] text-slate-500 overflow-hidden flex-1 min-w-0">
-              <span [class]="j.statut === 'ACTIF' ? 'bg-[#e8354a]' : 'bg-slate-300'" 
-                    class="w-[6px] h-[6px] rounded-full shrink-0"></span>
-              <span class="truncate text-[#f87187]">{{ j.titre }}.pdf</span>
-            </div>
-
-            <div class="flex gap-1.5 shrink-0 ml-auto">
-              <button (click)="showDetails(j)" 
-                      class="w-[34px] h-[34px] rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center text-[0.8rem] hover:bg-slate-100 hover:text-slate-700 transition-all">
-                <i class="pi pi-eye"></i>
-              </button>
-              <button (click)="downloadPdf(j.fichierPdf)"
-                      class="w-[34px] h-[34px] rounded-lg bg-[#fff5f5] text-[#e8354a] flex items-center justify-center text-[0.8rem] hover:bg-[#fee2e2] transition-all">
-                <i class="pi pi-download"></i>
-              </button>
-              <button (click)="editJournal(j)" 
-                      class="w-[34px] h-[34px] rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center text-[0.8rem] hover:bg-slate-100 hover:text-slate-700 transition-all"
-                      *appHasRole="['ADMIN', 'SUPER_ADMIN']">
-                <i class="pi pi-pencil"></i>
-              </button>
-              <button (click)="deleteJournal(j.id)" 
-                      class="w-[34px] h-[34px] rounded-lg bg-[#fff5f5] text-[#e8354a] flex items-center justify-center text-[0.8rem] hover:bg-[#fee2e2] transition-all"
-                      *appHasRole="['ADMIN', 'SUPER_ADMIN']">
-                <i class="pi pi-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-      } @empty {
-          @if (loading) {
-            <div class="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
-              <p-progress-spinner ariaLabel="loading" />
-            </div>
-          } @else {
-            <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
-              <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <i class="pi pi-inbox text-2xl text-slate-300"></i>
-              </div>
-              <p class="text-slate-400 font-bold text-sm uppercase tracking-widest">Aucun journal trouvé</p>
-              <p class="text-slate-300 text-xs mt-1">Modifiez votre recherche ou ajoutez un nouveau journal</p>
-            </div>
           }
-      }
+
+        }@else{
+              <div class="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                  <p-progress-spinner ariaLabel="loading" />
+                </div>
+        }
+      
     </div>
 
     <p-paginator 

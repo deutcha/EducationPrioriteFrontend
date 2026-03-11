@@ -44,8 +44,16 @@ export const routes: Routes = [
           loadComponent: () => import('./page/journal/journal.component').then(m => m.JournalComponent)
         },
         { 
+          path: 'article', 
+          loadComponent: () => import('./page/article/article.component').then(m => m.ArticleComponent)
+        },
+        { 
           path: 'article/:rubriqueId/:rubriqueNom', 
           loadComponent: () => import('./page/article/article.component').then(m => m.ArticleComponent)
+        },
+        { 
+          path: 'articles/lire/:slug', 
+          loadComponent: () => import('./page/lire-article/lire-article.component').then(m => m.LireArticleComponent)
         },
         { 
           path: 'utilisateur', 

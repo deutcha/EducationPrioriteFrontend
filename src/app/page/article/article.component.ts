@@ -20,6 +20,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { HasRoleDirective } from '../../layouts/auth/has-role.directive';
 import { PaginatorModule } from 'primeng/paginator';
 import { ProgressSpinner } from 'primeng/progressspinner';
+import { Select } from 'primeng/select';
 
 
 @Component({
@@ -29,7 +30,7 @@ import { ProgressSpinner } from 'primeng/progressspinner';
     CommonModule, FormsModule, ButtonModule, ToastModule, 
     ConfirmDialogModule, SelectButtonModule, DialogModule,
     InputTextModule, TextareaModule, DropdownModule, DatePickerModule,
-     HasRoleDirective, PaginatorModule, ProgressSpinner
+     HasRoleDirective, PaginatorModule, ProgressSpinner, Select
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './article.component.html',
@@ -43,16 +44,6 @@ export class ArticleComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
   private router = inject(Router);
   private searchTimeout: any;
-
-  sectionsMap: { [articleId: number]: ArticleSectionDto[] } = {};
-  loadingSections: { [articleId: number]: boolean } = {};
-  sectionDialogVisible: boolean = false;
-  currentArticleForSection: ArticleDto | null = null;
-  editingSection: ArticleSectionDto | null = null;
-  sectionForm: ArticleSectionDto = { contenu: '', ordre: 0 };
-  sectionImageFile: File | null = null;
-  sectionImagePreview: string | null = null;
-  loadingSectionBtn: boolean = false;
 
   loading: boolean = true;
   loadingBtn: boolean = false;
@@ -83,6 +74,8 @@ export class ArticleComponent implements OnInit, OnDestroy {
   selectedStatut: string = 'PUBLIE'; 
   selectedDateDebut: Date | null = null;
   selectedDateFin: Date | null = null;
+  rubriques: {name: string; code: string }[] = [];
+  selectedRubrique: { name: string; code: string } | undefined;
 
  statutOptions = [
   { label: 'Tout', value: 'TOUT' },
@@ -112,9 +105,10 @@ export class ArticleComponent implements OnInit, OnDestroy {
  loadArticles() {
     this.loading = true;
     this.subs.add(
+      
       this.service.getArticles(
         undefined,
-        this.rubriqueId,
+        this.selectedRubrique?.code ? +this.selectedRubrique.code : this.rubriqueId,
         this.searchTerm,          
         this.selectedStatut !== 'TOUT' ? this.selectedStatut : undefined,
         this.selectedDateDebut ?? undefined,
@@ -122,11 +116,13 @@ export class ArticleComponent implements OnInit, OnDestroy {
         this.currentPage,
         this.pageSize
       ).subscribe({
+        
         next: (data) => {
           this.articles = data.content;
           this.totalElements = data.totalElements;
           this.totalPages = data.totalPages;
           this.loading = false;
+          if (this.rubriques.length === 0) this.loadRubriques();
         },
         error: () => {
           this.loading = false;
@@ -136,7 +132,30 @@ export class ArticleComponent implements OnInit, OnDestroy {
     );
   }
 
+  loadRubriques() {
+  this.subs.add(
+    this.service.getRubriquesSimple(undefined, undefined, 0, 200).subscribe({
+      next: (data) => {
+        this.rubriques = [
+          ...data.map(r => ({ name: r.nom, code: r.id.toString() }))
+        ];
+      },
+      error: (error) => {
+        console.log(error )
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les rubriques' })
+      }
+    })
+  );
+}
+
+    onRubriqueFilterChange() {
+      this.loading = true;
+      this.currentPage = 0;
+      this.loadArticles();
+    }
+
  onSearchChange() {
+    this.loading = true;
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
       this.currentPage = 0;
@@ -146,13 +165,19 @@ export class ArticleComponent implements OnInit, OnDestroy {
 
 
   onFilterChange() {
+    this.loading = true;
     this.currentPage = 0;
     this.loadArticles();
   }
 
   onPageChange(event: any) {
+    this.loading = true;
     this.currentPage = event.page;
     this.loadArticles();
+  }
+
+  showDetails(article: ArticleDto) {
+    this.router.navigate(['/child/articles/lire', article.slug]);
   }
 
   openNew() {
@@ -163,14 +188,6 @@ export class ArticleComponent implements OnInit, OnDestroy {
     this.imagePreview = null;
     this.submitted = false;
     this.articleDialog = true;
-  }
-
-  
-  showDetails(article: ArticleDto) {
-    this.selectedArticle = article;
-    this.displayDetails = true;
-    this.loadSections(article);
-    
   }
 
   editArticle(item: ArticleDto) {
@@ -238,106 +255,9 @@ export class ArticleComponent implements OnInit, OnDestroy {
     });
   } 
 
-goBack(): void { 
-  this.router.navigate(['/child/rubrique']);
-}
-
-saveAsDraft(): void {
-  this.article.statut = StatutArticle.BROUILLON;
-  this.saveArticle();
-}
-
-  loadSections(article: ArticleDto) {
-    if (this.sectionsMap[article.id]) return; 
-    this.loadingSections[article.id] = true;
-    this.subs.add(
-      this.service.getSectionsByArticle(article.id).subscribe({
-        next: (sections) => {
-          this.sectionsMap[article.id] = sections;
-          this.loadingSections[article.id] = false;
-        },
-        error: () => { this.loadingSections[article.id] = false; }
-      })
-    );
+  goBack(): void { 
+    this.router.navigate(['/child/rubrique']);
   }
-
-  openSectionDialog(article: ArticleDto, section?: ArticleSectionDto) {
-    this.currentArticleForSection = article;
-    this.sectionImageFile = null;
-    this.sectionImagePreview = null;
-    if (section) {
-      this.editingSection = section;
-      this.sectionForm = { ...section };
-      this.sectionImagePreview = section.image || null;
-    } else {
-      this.editingSection = null;
-      this.sectionForm = { contenu: '', ordre: (this.sectionsMap[article.id]?.length || 0) };
-    }
-    this.sectionDialogVisible = true;
-  }
-
-  onSectionFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.sectionImageFile = file;
-      const reader = new FileReader();
-      reader.onload = (e: any) => this.sectionImagePreview = e.target.result;
-      reader.readAsDataURL(file);
-    }
-  }
-
-  saveSection() {
-    if (!this.sectionForm.contenu || !this.currentArticleForSection) return;
-    this.loadingSectionBtn = true;
-    this.subs.add(
-      this.service.saveSection(
-        this.currentArticleForSection.id,
-        this.sectionForm,
-        this.sectionImageFile || undefined
-      ).subscribe({
-        next: (saved) => {
-          const articleId = this.currentArticleForSection!.id;
-          if (!this.sectionsMap[articleId]) this.sectionsMap[articleId] = [];
-          if (this.editingSection) {
-            const idx = this.sectionsMap[articleId].findIndex(s => s.id === saved.id);
-            if (idx !== -1) this.sectionsMap[articleId][idx] = saved;
-          } else {
-            this.sectionsMap[articleId].push(saved);
-          }
-          this.sectionDialogVisible = false;
-          this.loadingSectionBtn = false;
-          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Section enregistrée' });
-        },
-        error: () => {
-          this.loadingSectionBtn = false;
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la sauvegarde' });
-        }
-      })
-    );
-  }
-
-  deleteSection(article: ArticleDto, section: ArticleSectionDto) {
-    this.confirmationService.confirm({
-      message: 'Supprimer cette section ?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      acceptButtonStyleClass: 'p-button-danger p-button-text',
-      rejectLabel: 'Annuler',
-      rejectButtonStyleClass: 'p-button-text p-button-secondary',
-      accept: () => {
-        this.subs.add(
-          this.service.deleteSection(article.id, section.id!).subscribe({
-            next: () => {
-              this.sectionsMap[article.id] = this.sectionsMap[article.id].filter(s => s.id !== section.id);
-              this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Section supprimée' });
-            }
-          })
-        );
-      }
-    });
-  }
-
   ngOnDestroy() { 
     this.subs.unsubscribe(); 
   Object.values(this.imageUrls).forEach(url => URL.revokeObjectURL(url));}

@@ -80,11 +80,13 @@ export class RubriqueComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(event: any) {
+    this.loading = true;
     this.currentPage = event.page;
     this.loadRubriques();
   }
 
   onSearchChange() {
+    this.loading = true;
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
       this.currentPage = 0;

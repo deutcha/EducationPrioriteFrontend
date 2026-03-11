@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { 
   ArticleDto, ArticleSaveDto, 
   JournalPdfDto, JournalPdfSaveDto, 
@@ -174,6 +174,17 @@ export class JournalManagerService {
     params = params.set('page', page.toString());
     params = params.set('size', size.toString());
     return this.http.get<Page<RubriqueDto>>(`${this.API_URL}/rubrique`, { params });
+  }
+
+  getRubriquesSimple(id?: number, search?: string, page: number = 0, size: number = 10): Observable<{id: number, nom: string}[]> {
+    let params = new HttpParams();
+    if (id) params = params.set('id', id.toString());
+    if (search) params = params.set('search', search);
+    params = params.set('page', page.toString());
+    params = params.set('size', size.toString());
+    return this.http.get<Page<RubriqueDto>>(`${this.API_URL}/rubrique`, { params }).pipe(
+      map(page => page.content.map(r => ({ id: r.id, nom: r.nom })))
+    );
   }
 
   createRubrique(rubrique: RubriqueSaveDto): Observable<RubriqueDto> {

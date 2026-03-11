@@ -6,6 +6,7 @@ import { JournalManagerService } from '../../services/journal-manager-service.se
 import { ArticleDto, JournalPdfDto } from '../../../model/model';
 import { AuthService } from '../../auth/auth.service';
 import { HasRoleDirective } from '../../auth/has-role.directive';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,6 +18,7 @@ import { HasRoleDirective } from '../../auth/has-role.directive';
 export class DashboardComponent implements OnInit {
 
   private service = inject(JournalManagerService);
+  private messageService = inject(MessageService);
   private authService = inject(AuthService);
 
   journals: JournalPdfDto[] = [];
@@ -46,6 +48,26 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
+   private showToast(severity: string, summary: string, detail: string) {
+    this.messageService.add({ severity, summary, detail });
+  }
+
+  openPdf(fileUrl: string) {
+      if (!fileUrl) return;
+
+      this.service.downloadPdf(fileUrl).subscribe({
+        next: (blob: Blob) => {
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank');
+          setTimeout(() => URL.revokeObjectURL(url), 5000); 
+        },
+        error: (err) => {
+          console.error('Erreur ouverture PDF:', err);
+          this.showToast('error', 'Erreur', 'Impossible d\'ouvrir le PDF');
+        }
+      });
+    }
 
   get isAuthenticated(): boolean {
    return this.authService.isauthenticate();

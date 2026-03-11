@@ -11,13 +11,12 @@ import { AuthService } from '../auth/auth.service';
 import { DialogModule } from "primeng/dialog";
 import { Subscription } from 'rxjs/internal/Subscription';
 import { RegisterComponent } from "../auth/register/register/register.component";
-import { HasRoleDirective } from '../auth/has-role.directive';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, ConfirmDialogModule, ToastModule, ButtonModule, DialogModule, RegisterComponent, HasRoleDirective, ProgressSpinner],
+  imports: [CommonModule, ConfirmDialogModule, ToastModule, ButtonModule, DialogModule, RegisterComponent, ProgressSpinner],
   providers: [ConfirmationService, MessageService],
   templateUrl: './profil.component.html',
   styleUrls: ['./profil.component.scss']
@@ -74,27 +73,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  confirmDelete() {
-    this.confirmationService.confirm({
-      message: 'Une fois que vous supprimez votre compte, il n\'y a pas de retour en arrière. Êtes-vous certain ?',
-      header: 'Supprimer mon compte',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer mon compte',
-      acceptButtonStyleClass: 'p-button-danger bg-red-600 border-none',
-      rejectLabel: 'Annuler',
-      accept: () => {
-        if (this.user) {
-          this.subs?.add(
-            this.userService.deleteUser(this.user.id).subscribe({
-            next: () => this.logout(),
-            error: () => this.messageService.add({ severity: 'error', detail: 'Erreur lors de la suppression' })
-          })
-          )
-        }
-      }
-    });
   }
 
   getInitials(username: string): string {

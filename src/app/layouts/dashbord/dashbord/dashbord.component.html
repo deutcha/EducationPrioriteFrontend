@@ -10,10 +10,10 @@
       <div class="hero-text">
         <span class="hero-eyebrow">
           <span class="eyebrow-dot"></span>
-          Média éducatif numérique
+          Site d'information spécialisé en éducation
         </span>
         <h1 class="hero-title">
-          L'excellence<br>
+          L'information<br>
           <em>éducative</em><br>
           à portée de main.
         </h1>
@@ -114,7 +114,7 @@
         <div class="module-accent mod-rose"></div>
         <div class="module-icon-wrap mod-rose-soft"><i class="pi pi-file-pdf"></i></div>
         <div class="module-number">03</div>
-        <h3 class="module-title">Journaux PDF</h3>
+        <h3 class="module-title">édition hebdomadaire</h3>
         <p class="module-desc">Téléchargez nos éditions mensuelles. Une bibliothèque complète toujours disponible.</p>
         <div class="module-features">
           <span><i class="pi pi-check-circle"></i> Éditions mensuelles</span>
@@ -124,7 +124,7 @@
         <div class="module-cta">Télécharger <i class="pi pi-arrow-right"></i></div>
       </div>
 
-      <div class="module-card"  >
+      <div class="module-card" *appHasRole="['ADMIN', 'SUPER_ADMIN']" >
         <div class="module-accent mod-slate"></div>
         <div class="module-icon-wrap mod-slate-soft"><i class="pi pi-users"></i></div>
         <div class="module-number">04</div>
@@ -135,7 +135,7 @@
           <span><i class="pi pi-check-circle"></i> Rôles & permissions</span>
           <span><i class="pi pi-check-circle"></i> Communauté active</span>
         </div>
-        <div class="module-cta" *appHasRole="['ADMIN', 'SUPER_ADMIN']" routerLink="/child/utilisateur">Accéder <i class="pi pi-arrow-right"></i></div>
+        <div class="module-cta"  routerLink="/child/utilisateur">Accéder <i class="pi pi-arrow-right"></i></div>
       </div>
     </div>
   </section>
@@ -151,7 +151,7 @@
       </div>
       <div class="journals-grid">
         @for (journal of journals; track journal.id) {
-          <div class="journal-card" routerLink="/child/journal">
+          <div class="journal-card" (click)="openPdf(journal.fichierPdf)">
             <div class="journal-cover">
               <span class="journal-status" [class.active]="journal.statut === 'ACTIF'">{{ journal.statut }}</span>
               @if (journal.imageCouverture) {
@@ -175,11 +175,11 @@
           <span class="section-label">Sélection éditoriale</span>
           <h2 class="content-section-title">À la une</h2>
         </div>
-        <a routerLink="/child/rubrique" class="see-all-btn">Voir tout <i class="pi pi-arrow-right"></i></a>
+        <a routerLink="/child/article" class="see-all-btn">Voir tout <i class="pi pi-arrow-right"></i></a>
       </div>
       <div class="articles-grid">
         @for (art of featuredArticles; track art.id) {
-          <div class="article-card" [routerLink]="['/child/article', art.rubriqueId, art.rubriqueNom]">
+          <div class="article-card" [routerLink]="['/child/articles/lire', art.slug]">
             <div class="article-img-wrap">
               @if (art.image) {
                 <img [src]="art.image" class="article-img" alt="">
