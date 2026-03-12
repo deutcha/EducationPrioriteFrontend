@@ -12,7 +12,6 @@ export const authGuard: CanActivateFn = (route, state) => {
    if(token) {
     const user : UserMap | null = loginService.restoreUserFromToken(token);
     loginService.user.set(user);
-    console.log(loginService.user())
   }else{
     router.navigate(['/login']);
     return false;

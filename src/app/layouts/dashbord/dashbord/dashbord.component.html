@@ -96,7 +96,7 @@
         <div class="module-cta">Explorer <i class="pi pi-arrow-right"></i></div>
       </div>
 
-      <div class="module-card module-card--featured" routerLink="/child/rubrique">
+      <div class="module-card module-card--featured" routerLink="/child/article">
         <div class="module-accent mod-white"></div>
         <div class="module-icon-wrap mod-white-soft"><i class="pi pi-pencil"></i></div>
         <div class="module-number">02</div>
@@ -124,18 +124,18 @@
         <div class="module-cta">Télécharger <i class="pi pi-arrow-right"></i></div>
       </div>
 
-      <div class="module-card" *appHasRole="['ADMIN', 'SUPER_ADMIN']" >
+      <div class="module-card">
         <div class="module-accent mod-slate"></div>
-        <div class="module-icon-wrap mod-slate-soft"><i class="pi pi-users"></i></div>
+        <div class="module-icon-wrap mod-slate-soft"><i class="pi pi-user"></i></div>
         <div class="module-number">04</div>
-        <h3 class="module-title">Espace membres</h3>
-        <p class="module-desc">Gérez votre profil et rejoignez une communauté de professionnels de l'éducation.</p>
+        <h3 class="module-title">Mon profil</h3>
+        <p class="module-desc">Consultez et mettez à jour vos informations personnelles, gérez vos préférences et suivez votre activité sur la plateforme.</p>
         <div class="module-features">
-          <span><i class="pi pi-check-circle"></i> Profil personnalisé</span>
-          <span><i class="pi pi-check-circle"></i> Rôles & permissions</span>
-          <span><i class="pi pi-check-circle"></i> Communauté active</span>
+          <span><i class="pi pi-check-circle"></i> Informations personnelles</span>
+          <span><i class="pi pi-check-circle"></i> Sécurité & mot de passe</span>
+          <span><i class="pi pi-check-circle"></i> Historique d'activité</span>
         </div>
-        <div class="module-cta"  routerLink="/child/utilisateur">Accéder <i class="pi pi-arrow-right"></i></div>
+    
       </div>
     </div>
   </section>
@@ -153,7 +153,7 @@
         @for (journal of journals; track journal.id) {
           <div class="journal-card" (click)="openPdf(journal.fichierPdf)">
             <div class="journal-cover">
-              <span class="journal-status" [class.active]="journal.statut === 'ACTIF'">{{ journal.statut }}</span>
+              <span class="journal-status" [class.active]="journal.statut === 'ACTIF'" *appHasRole="['ADMIN', 'SUPER_ADMIN']">{{ journal.statut }}</span>
               @if (journal.imageCouverture) {
                 <img [src]="journal.imageCouverture" class="journal-cover-img" [alt]="journal.titre">
               } @else {
@@ -179,7 +179,7 @@
       </div>
       <div class="articles-grid">
         @for (art of featuredArticles; track art.id) {
-          <div class="article-card" [routerLink]="['/child/articles/lire', art.slug]">
+          <div class="article-card " [routerLink]="['/child/articles/lire', art.slug]">
             <div class="article-img-wrap">
               @if (art.image) {
                 <img [src]="art.image" class="article-img" alt="">

@@ -54,7 +54,8 @@ export class ContactComponent implements OnDestroy{
             });
             this.loadingBtn = false;
           },
-          error: () => {
+          error: (error) => {
+            console.log('Erreur lors de l\'envoi du message:', error);
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
